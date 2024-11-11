@@ -1,8 +1,7 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'screens/home_screen.dart';
-// 'screens/network_error_screen.dart';
+import 'dart:async';
+import 'package:connectivity_plus/connectivity_plus.dart'; // Import the connectivity package
+import 'home_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -13,31 +12,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Weather App',
-      theme: ThemeData(
-        primarySwatch: Colors.orange,
-        hintColor: Colors.blue,
-        scaffoldBackgroundColor: Colors.white,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.orange,
-        ),
-        floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          backgroundColor: Colors.blue,
-        ),
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(color: Colors.black),
-          bodyMedium: TextStyle(color: Colors.black),
-          bodySmall: TextStyle(color: Colors.black),
-        ),
-        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: Colors.orange,
-          selectedItemColor: Colors.blue,
-          unselectedItemColor: Colors.white,
-        ),
-      ),
-      home: SplashScreen(),
+      theme: ThemeData(primarySwatch: Colors.blue),
+      initialRoute: '/',
       routes: {
-        '/home': (context) => HomeScreen(),
-        '/networkError': (context) => NetworkErrorScreen(),
+        '/': (context) => SplashScreen(),
+        '/home': (context) => HomeScreen(), // Replace with your home screen
       },
     );
   }
@@ -52,64 +31,62 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    checkInternetConnectivity();
-  }
-
-  // Check network connectivity
-  Future<void> checkInternetConnectivity() async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
-    if (connectivityResult == ConnectivityResult.none) {
-      // No internet connection, show error screen
-      Timer(Duration(seconds: 5), () {
-        Navigator.pushReplacementNamed(context, '/networkError');
-      });
-    } else {
-      // Internet is available, proceed to HomeScreen
-      Timer(Duration(seconds: 5), () {
+    // Simulate a delay, e.g., 3 seconds
+    Timer(Duration(seconds: 3), () async {
+      // Check internet connectivity
+      var connectivityResult = await Connectivity().checkConnectivity();
+      
+      if (connectivityResult == ConnectivityResult.none) {
+        // Show alert if no internet
+        _showNoInternetDialog();
+      } else {
+        // Navigate to Home screen if connected to the internet
         Navigator.pushReplacementNamed(context, '/home');
-      });
-    }
+      }
+    });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Colors.orange,
-      body: Center(
-        child: Text(
-          'Weather App',
-          style: TextStyle(
-            fontSize: 30,
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
+  // Show an alert if there's no internet connection
+  void _showNoInternetDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('No Internet Connection'),
+          content: Text('Please check your internet connection before continuing.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
     );
   }
-}
-
-class NetworkErrorScreen extends StatelessWidget {
-  const NetworkErrorScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Network Error')),
+      backgroundColor: Colors.blue, // Background color for the splash screen
       body: Center(
-        child: AlertDialog(
-          title: Text('No Internet Connection'),
-          content: Text('Please check your network connection.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                // Retry connectivity check
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => SplashScreen()),
-                );
-              },
-              child: Text('Retry'),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Add an image or logo for the splash screen
+            Image.asset('assets/weather_logo.png', width: 150),
+            SizedBox(height: 20),
+            Text(
+              'Weather App',
+              style: TextStyle(
+                fontSize: 30,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                // Use local font in case of no internet
+                fontFamily: 'Roboto',
+              ),
             ),
           ],
         ),
